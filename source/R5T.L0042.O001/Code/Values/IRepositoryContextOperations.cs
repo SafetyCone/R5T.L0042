@@ -31,7 +31,7 @@ namespace R5T.L0042.O001
                     context,
                     ownerName);
 
-        public Func<IRepositoryContext, Task> In_GitHubRepositoryContext_00(
+        public Func<IRepositoryContext, Task> In_GitHubRepositoryContext(
             IGitHubRepositoryName repositoryName,
             IGitHubRepositoryOwnerName ownerName,
             params Func<L0036.T000.N001.IGitHubRepositoryContext, Task>[] operations)
