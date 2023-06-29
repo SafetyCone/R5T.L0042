@@ -8,13 +8,22 @@ using R5T.T0186;
 using R5T.T0186.Extensions;
 
 using R5T.L0042.T000;
-
+using System.Collections.Generic;
 
 namespace R5T.L0042.O001
 {
     [ValuesMarker]
     public partial interface IRepositoryContextOperations : IValuesMarker
     {
+        /// <inheritdoc cref="IRepositoryContextOperator.In_CreateRepositoryContext{TRepositoryContext}(TRepositoryContext, Func{TRepositoryContext, Task}[])"/>
+        public Func<TRepositoryContext, Task> In_CreateRepositoryContext<TRepositoryContext>(
+            IEnumerable<Func<TRepositoryContext, Task>> operations = default)
+            where TRepositoryContext : IRepositoryContext
+            =>
+                context => Instances.RepositoryContextOperator.In_CreateRepositoryContext(
+                    context,
+                    operations);
+
         /// <inheritdoc cref="IRepositoryContextOperator.In_CreateRepositoryContext{TRepositoryContext}(TRepositoryContext, Func{TRepositoryContext, Task}[])"/>
         public Func<TRepositoryContext, Task> In_CreateRepositoryContext<TRepositoryContext>(
             params Func<TRepositoryContext, Task>[] operations)
@@ -24,7 +33,7 @@ namespace R5T.L0042.O001
                     context,
                     operations);
 
-        /// <inheritdoc cref="IRepositoryContextOperator.Verify_DoesNotAlreadyExist(IRepositoryContext)"/>
+        /// <inheritdoc cref="IRepositoryContextOperator.Verify_DoesNotAlreadyExist(IRepositoryContext, IRepositoryOwnerName)"/>
         public Func<IRepositoryContext, Task> Verify_DoesNotAlreadyExist(IRepositoryOwnerName ownerName)
             =>
                 context => Instances.RepositoryContextOperator.Verify_DoesNotAlreadyExist(

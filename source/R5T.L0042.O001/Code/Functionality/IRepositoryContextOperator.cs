@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,12 +45,13 @@ namespace R5T.L0042.O001
         /// </summary>
         public Task In_CreateRepositoryContext<TRepositoryContext>(
             TRepositoryContext repositoryContext,
-            params Func<TRepositoryContext, Task>[] operations)
+            IEnumerable<Func<TRepositoryContext, Task>> operations = default)
             where TRepositoryContext : IRepositoryContext
         {
             return Instances.ActionOperator.Run(
                 repositoryContext,
-                    operations
+                    // Need to handle default (null) value for the input, since prepend will require a non-null value.
+                    Instances.EnumerableOperator.EmptyIfNull(operations)
                     .Prepend(
                         _ =>
                         {
@@ -64,6 +66,17 @@ namespace R5T.L0042.O001
 
                             return Task.CompletedTask;
                         }));
+        }
+
+        /// <inheritdoc cref="In_CreateRepositoryContext{TRepositoryContext}(TRepositoryContext, IEnumerable{Func{TRepositoryContext, Task}})"/>
+        public Task In_CreateRepositoryContext<TRepositoryContext>(
+            TRepositoryContext repositoryContext,
+            params Func<TRepositoryContext, Task>[] operations)
+            where TRepositoryContext : IRepositoryContext
+        {
+            return this.In_CreateRepositoryContext(
+                repositoryContext,
+                operations.AsEnumerable());
         }
     }
 }
