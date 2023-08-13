@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using R5T.T0132;
 using R5T.T0184;
+using R5T.T0222;
 
 using R5T.L0042.T000;
 
@@ -14,6 +15,18 @@ namespace R5T.L0042.O001
     [FunctionalityMarker]
     public partial interface IRepositoryContextOperator : IFunctionalityMarker
     {
+        public Task Verify_DoesNotAlreadyExist(
+            IRepositoryContext context,
+            IOrganizationName organizationName)
+        {
+            var gitHubRepositoryOwnerName = Instances.OrganizationNameOperator.Get_GitHubRepositoryOwnerName(
+                organizationName);
+
+            return this.Verify_DoesNotAlreadyExist(
+                context,
+                gitHubRepositoryOwnerName);
+        }
+
         /// <summary>
         /// Verifies that a repository name is available on both GitHub and in the local file system.
         /// </summary>
@@ -21,12 +34,18 @@ namespace R5T.L0042.O001
             IRepositoryContext context,
             IRepositoryOwnerName ownerName)
         {
+            context.TextOutput.WriteInformation("Checking repository does not already exist...");
+
             // GitHub.
+            context.TextOutput.WriteInformation("Checking remote GitHub repository...");
+
             var gettingExistsOnGitHub = Instances.GitHubOperator.RepositoryExists(
                 ownerName.Value,
                 context.RepositoryName.Value);
 
             // Local.
+            context.TextOutput.WriteInformation("Checking remote GitHub repository...");
+
             var existsInLocal = Instances.LocalRepositoryOperator.RepositoryExists(
                 ownerName.Value,
                 context.RepositoryName.Value);

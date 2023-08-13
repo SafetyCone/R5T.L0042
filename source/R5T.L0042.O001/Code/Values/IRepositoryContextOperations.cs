@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using R5T.L0047.T000;
@@ -6,9 +7,9 @@ using R5T.T0131;
 using R5T.T0184;
 using R5T.T0186;
 using R5T.T0186.Extensions;
+using R5T.T0222;
 
 using R5T.L0042.T000;
-using System.Collections.Generic;
 
 namespace R5T.L0042.O001
 {
@@ -35,10 +36,19 @@ namespace R5T.L0042.O001
 
         /// <inheritdoc cref="IRepositoryContextOperator.Verify_DoesNotAlreadyExist(IRepositoryContext, IRepositoryOwnerName)"/>
         public Func<IRepositoryContext, Task> Verify_DoesNotAlreadyExist(IRepositoryOwnerName ownerName)
-            =>
-                context => Instances.RepositoryContextOperator.Verify_DoesNotAlreadyExist(
-                    context,
-                    ownerName);
+        {
+            return context => Instances.RepositoryContextOperator.Verify_DoesNotAlreadyExist(
+                context,
+                ownerName);
+        }
+
+        public Func<IRepositoryContext, Task> Verify_DoesNotAlreadyExist(
+            IOrganizationName organizationName)
+        {
+            return context => Instances.RepositoryContextOperator.Verify_DoesNotAlreadyExist(
+                context,
+                organizationName);
+        }
 
         public Func<IRepositoryContext, Task> In_GitHubRepositoryContext(
             IGitHubRepositoryName repositoryName,
@@ -52,14 +62,33 @@ namespace R5T.L0042.O001
                     operations);
 
         public Func<IRepositoryContext, Task> In_GitHubRepositoryContext(
-            IOwnerName ownerName,
+            IGitHubRepositoryOwnerName ownerName,
             params Func<L0036.T000.N001.IGitHubRepositoryContext, Task>[] operations)
             =>
                 context => Instances.GitHubRepositoryContextOperator.In_GitHubRepositoryContext(
                     context.RepositoryName.Value.ToGitHubRepositoryName(),
-                    ownerName.Value.ToGitHubRepositoryOwnerName(),
+                    ownerName,
                     context.TextOutput,
                     operations);
+
+        public Func<IRepositoryContext, Task> In_GitHubRepositoryContext(
+            IOrganizationName organizationName,
+            params Func<L0036.T000.N001.IGitHubRepositoryContext, Task>[] operations)
+        {
+            Task Internal(IRepositoryContext context)
+            {
+                var gitHubRepositoryName = context.RepositoryName.ToGitHubRepositoryName();
+                var gitHubRepositoryOwnerName = Instances.OrganizationNameOperator.Get_GitHubRepositoryOwnerName(organizationName);
+
+                return Instances.GitHubRepositoryContextOperator.In_GitHubRepositoryContext(
+                    gitHubRepositoryName,
+                    gitHubRepositoryOwnerName,
+                    context.TextOutput,
+                    operations);
+            }
+
+            return Internal;
+        }
 
         public Func<IRepositoryContext, Task> In_LocalGitRepositoryContext(
             IGitHubRepositoryName repositoryName,
@@ -67,8 +96,46 @@ namespace R5T.L0042.O001
             params Func<ILocalGitRepositoryContext, Task>[] operations)
             =>
                 context => Instances.LocalGitRepositoryContextOperator.In_LocalGitRepositoryContext(
+                    context,
                     repositoryName,
                     ownerName,
                     operations);
+
+        public Func<IRepositoryContext, Task> In_LocalGitRepositoryContext(
+            IOrganizationName organizationName,
+            params Func<ILocalGitRepositoryContext, Task>[] operations)
+        {
+            Task Internal(IRepositoryContext context)
+            {
+                var gitHubRepositoryName = context.RepositoryName.ToGitHubRepositoryName();
+                var gitHubRepositoryOwnerName = Instances.OrganizationNameOperator.Get_GitHubRepositoryOwnerName(organizationName);
+
+                return Instances.LocalGitRepositoryContextOperator.In_LocalGitRepositoryContext(
+                    context,
+                    gitHubRepositoryName,
+                    gitHubRepositoryOwnerName,
+                    operations);
+            }
+
+            return Internal;
+        }
+
+        public Func<IRepositoryContext, Task> In_LocalGitRepositoryContext(
+            IGitHubRepositoryOwnerName gitHubRepositoryOwnerName,
+            params Func<ILocalGitRepositoryContext, Task>[] operations)
+        {
+            Task Internal(IRepositoryContext context)
+            {
+                var gitHubRepositoryName = context.RepositoryName.ToGitHubRepositoryName();
+
+                return Instances.LocalGitRepositoryContextOperator.In_LocalGitRepositoryContext(
+                    context,
+                    gitHubRepositoryName,
+                    gitHubRepositoryOwnerName,
+                    operations);
+            }
+
+            return Internal;
+        }
     }
 }
